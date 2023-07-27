@@ -8,18 +8,19 @@ import { SafeAreaView,
     Image,
     Text 
 } from "react-native";
-import { FONTS, COLORS, SIZES, icons, images } from "../../constants";
+import { FancyAlert } from 'react-native-expo-fancy-alerts';
 import axios from "axios";
+import { FONTS, COLORS, SIZES, icons, images } from "../../constants";
+import { baseUrl } from "../../services/BaseApi";
 
 const Books = ({ navigation }) => {
-
-    const [isLoading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [visible, setVisible] = React.useState(false);
     const [data, setData] = useState([]);
 
     const getMovies = async () => {
-        const url = 'http://192.168.1.12:3000/books';
         try {
-            await axios.get(url)
+            await axios.get(`${baseUrl}books`)
             .then(response => {
                 setData(response.data);
             })
@@ -37,8 +38,24 @@ const Books = ({ navigation }) => {
         getMovies();
     }, []);
 
-    const handleSubmit = (values) => {
-        alert(values)
+    const handleSubmit = async (values) => {
+        setIsLoading(true);
+        try {
+          const response = await axios.delete(`${baseUrl}book/${values}`);
+          if (response.status === 200) {
+            setIsLoading(false);
+            setVisible(true);
+            setTimeout(() => {
+              navigation.navigate('Books');
+              setVisible(false);
+            }, 3000);
+          } else {
+            throw new Error("Failed to delete resource");
+          }
+        } catch (error) {
+          alert("Failed to delete resource!!");
+          setIsLoading(false);
+        }
     }
 
     const renderItem = ({ item }) => {
@@ -183,6 +200,21 @@ const Books = ({ navigation }) => {
             {/* Body Section */}
             <ScrollView style={{ marginTop: SIZES.radius }}>
                 <View style={{ flex: 1, marginTop: 0, paddingLeft: SIZES.padding }}>
+                    <FancyAlert
+                        visible={visible}
+                        icon={<View style={{
+                            flex: 1,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: COLORS.primary,
+                            borderRadius: 50,
+                            width: '100%',
+                        }}><Text>🤓</Text></View>}
+                        style={{ backgroundColor: 'white' }}
+                    >
+                        <Text style={{ marginTop: -16, marginBottom: 32 }}>successfully deleted!!</Text>
+                    </FancyAlert>
                     {isLoading ? (
                         <ActivityIndicator />
                     ) : (

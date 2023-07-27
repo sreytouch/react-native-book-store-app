@@ -7,18 +7,17 @@ import {
     FlatList,
     ActivityIndicator
 } from "react-native";
-import { FONTS, COLORS, SIZES, icons, images } from "../../constants";
 import axios from "axios";
+import { FONTS, COLORS, SIZES, icons, images } from "../../constants";
+import { baseUrl } from "../../services/BaseApi";
 
 const ListBooks = ({ navigation }) => {
-
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState([]);
 
     const getMovies = async () => {
-        const url = 'http://192.168.1.12:3000/books';
         try {
-            await axios.get(url)
+            await axios.get(`${baseUrl}books`)
             .then(response => {
                 setData(response.data);
             })

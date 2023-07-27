@@ -11,8 +11,7 @@ import {
     reservationProccessDatas,
     allBooks
 } from "../services/Books";
-
-import { getAll } from "../services/BaseApi";
+import { getAll, baseUrl } from "../services/BaseApi";
 
 export {
     icons,
@@ -29,5 +28,6 @@ export {
     categoriesDatas,
     reservationProccessDatas,
     allBooks,
-    getAll
+    getAll,
+    baseUrl
 };

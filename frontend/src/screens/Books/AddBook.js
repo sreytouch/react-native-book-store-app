@@ -10,11 +10,12 @@ import {
   StyleSheet,
   Pressable
 } from 'react-native';
-import { COLORS, SIZES, FONTS, icons } from "../../constants";
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
 import axios from "axios";
+import { COLORS, SIZES, FONTS, icons } from "../../constants";
 import validationSchema from "./validationSchema";
 import Input from "../../components/Form/Input";
+import { baseUrl } from "../../services/BaseApi";
 
 const initialValues = {
   title: '',
@@ -27,12 +28,11 @@ const AddBook = () => {
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [visible, setVisible] = React.useState(false);
-  const baseUrl = "http://192.168.1.12:3000";
   
   const onSubmit = async (values) => {
         setIsLoading(true);
         try {
-            const response = await axios.post(`${baseUrl}/book`, values);
+            const response = await axios.post(`${baseUrl}book`, values);
             if (response.status === 200) {
                 // alert(` You have created: ${JSON.stringify(response.data)}`);
                 setIsLoading(false);

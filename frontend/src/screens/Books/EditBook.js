@@ -12,10 +12,11 @@ import {
     Pressable,
     ActivityIndicator
 } from 'react-native';
-import { COLORS, SIZES, FONTS, icons } from "../../constants";
 import axios from "axios";
+import { COLORS, SIZES, FONTS, icons } from "../../constants";
 import validationSchema from "./validationSchema";
 import Input from "../../components/Form/Input";
+import { baseUrl } from "../../services/BaseApi";
 
 
 const EditBook = ({ route }) => {
@@ -23,12 +24,11 @@ const EditBook = ({ route }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [visible, setVisible] = React.useState(false);
     const [data, setData] = useState([]);
-    const baseUrl = "http://192.168.1.12:3000";
     const id = route.params;
     const onSubmit = async (values) => {
         setIsLoading(true);
         try {
-            const response = await axios.put(`${baseUrl}/book/${id}`, values);
+            const response = await axios.put(`${baseUrl}book/${id}`, values);
             if (response.status === 200) {
                 setIsLoading(false);
                 setVisible(true);
@@ -47,7 +47,7 @@ const EditBook = ({ route }) => {
 
     const getMovies = async () => {
         try {
-            await axios.get(`${baseUrl}/book/${id}`)
+            await axios.get(`${baseUrl}book/${id}`)
                 .then(response => {
                     setData(response.data);
                 })
@@ -82,7 +82,6 @@ const EditBook = ({ route }) => {
         isValid,
         handleSubmit,
     } = formik;
-    // console.log("====book====", book)
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.secondary, marginTop: 0 }}>
             <View style={{ flexDirection: 'row', paddingHorizontal: SIZES.radius, height: 50, alignItems: 'flex-end', marginBottom: 20 }}>
@@ -110,25 +109,24 @@ const EditBook = ({ route }) => {
                 </View>
             </View>
             <View style={{ flex: 1, padding: 24 }}>
-            {/* {!isLoading ? 
-                (
-                    <ActivityIndicator />
-                ) : ( */}
-                    <FancyAlert
-                        visible={visible}
-                        icon={<View style={{
-                            flex: 1,
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            backgroundColor: COLORS.primary,
-                            borderRadius: 50,
-                            width: '100%',
-                        }}><Text>🤓</Text></View>}
-                        style={{ backgroundColor: 'white' }}
-                    >
+                <FancyAlert
+                    visible={visible}
+                    icon={<View style={{
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: COLORS.primary,
+                        borderRadius: 50,
+                        width: '100%',
+                    }}><Text>🤓</Text></View>}
+                    style={{ backgroundColor: 'white' }}
+                >
                     <Text style={{ marginTop: -16, marginBottom: 32 }}>successfully save!!</Text>
-                    </FancyAlert>
+                </FancyAlert>
+                {!isLoading ?  (
+                    <ActivityIndicator />
+                ) : (
 
                     <View style={styles.container}>
                         <View style={styles.formFieldWrapper}>
@@ -214,7 +212,7 @@ const EditBook = ({ route }) => {
                             <Text style={styles.save}>Save</Text>
                         </Pressable>
                     </View>
-                {/* )} */}
+                )}
             </View>
 
         </SafeAreaView>

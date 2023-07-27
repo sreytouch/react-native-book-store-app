@@ -1,4 +1,4 @@
-# react-native-book-app
+# react-native-book-store-app
 
 # Technology
 - Frontend: React Native(Redux, Hooks)
