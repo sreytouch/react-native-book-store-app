@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, 
-    View, 
-    ScrollView, 
+import {
+    SafeAreaView,
+    View,
+    ScrollView,
     TouchableOpacity,
     ActivityIndicator,
-    FlatList, 
+    FlatList,
     Image,
-    Text 
+    Text,
+    RefreshControl
 } from "react-native";
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
 import axios from "axios";
@@ -14,50 +16,53 @@ import { FONTS, COLORS, SIZES, icons, images } from "../../constants";
 import { baseUrl } from "../../services/BaseApi";
 
 const Books = ({ navigation }) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [visible, setVisible] = React.useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [visible, setVisible] = useState(false);
     const [data, setData] = useState([]);
+
+    useEffect(() => {
+        getMovies();
+    }, []);
 
     const getMovies = async () => {
         try {
             await axios.get(`${baseUrl}books`)
-            .then(response => {
-                setData(response.data);
-            })
+                .then(response => {
+                    setRefreshing(true);
+                    setData(response.data);
+                    setTimeout(() => {
+                        setRefreshing(false);
+                    }, 500);
+                })
                 .catch(error => {
                     console.error('Error:', error);
                 });
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            setRefreshing(false);
         }
     };
 
-    useEffect(() => {
-        getMovies();
-    }, []);
-
-    const handleSubmit = async (values) => {
-        setIsLoading(true);
+    const handleSubmitDelete = async (values) => {
         try {
-          const response = await axios.delete(`${baseUrl}book/${values}`);
-          if (response.status === 200) {
-            setIsLoading(false);
-            setVisible(true);
-            setTimeout(() => {
-              navigation.navigate('Books');
-              setVisible(false);
-            }, 3000);
-          } else {
-            throw new Error("Failed to delete resource");
-          }
+            const response = await axios.delete(`${baseUrl}book/${values}`);
+            if (response.status === 200) {
+                setRefreshing(true);
+                setVisible(true);
+                setTimeout(() => {
+                    setVisible(false);
+                    setRefreshing(false);
+                    navigation.navigate('Home');
+                }, 500);
+            } else {
+                throw new Error("Failed to delete resource");
+            }
         } catch (error) {
-          alert("Failed to delete resource!!");
-          setIsLoading(false);
+            alert("Failed to delete resource!!");
+            setRefreshing(false);
         }
     }
-
     const renderItem = ({ item }) => {
         return (
             <View style={{ marginVertical: SIZES.base }}>
@@ -69,7 +74,7 @@ const Books = ({ navigation }) => {
                 >
                     {/* Book Cover */}
                     <Image
-                        source={images.reactnative} 
+                        source={images.reactnative}
                         resizeMode="cover"
                         style={{ width: 100, height: 150, borderRadius: 10 }}
                     />
@@ -128,10 +133,10 @@ const Books = ({ navigation }) => {
                 >
                     <View style={{
                         backgroundColor: COLORS.primary,
-                        borderRadius:20,
+                        borderRadius: 20,
                         padding: 5,
-                        marginBottom:10,
-                        opacity:0.7
+                        marginBottom: 10,
+                        opacity: 0.7
                     }}>
                         <Image
                             source={icons.edit_icon}
@@ -146,14 +151,14 @@ const Books = ({ navigation }) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={{ position: 'absolute', top: 50, right: 15 }}
-                    onPress={() => handleSubmit(item.id)}
+                    onPress={() => handleSubmitDelete(item.id)}
                 >
                     <View style={{
                         backgroundColor: COLORS.primary,
-                        borderRadius:20,
+                        borderRadius: 20,
                         padding: 5,
-                        marginBottom:10,
-                        opacity:0.7
+                        marginBottom: 10,
+                        opacity: 0.7
                     }}>
                         <Image
                             source={icons.delete_icon}
@@ -180,7 +185,7 @@ const Books = ({ navigation }) => {
                         borderRadius: 50,
                         padding: 5
                     }}
-                    onPress={() => navigation.goBack()}
+                    onPress={() => navigation.navigate("Home")}
                 >
                     <Image
                         source={icons.back_arrow_icon}
@@ -198,36 +203,41 @@ const Books = ({ navigation }) => {
             </View>
 
             {/* Body Section */}
-            <ScrollView style={{ marginTop: SIZES.radius }}>
-                <View style={{ flex: 1, marginTop: 0, paddingLeft: SIZES.padding }}>
-                    <FancyAlert
-                        visible={visible}
-                        icon={<View style={{
-                            flex: 1,
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            backgroundColor: COLORS.primary,
-                            borderRadius: 50,
-                            width: '100%',
-                        }}><Text>🤓</Text></View>}
-                        style={{ backgroundColor: 'white' }}
-                    >
-                        <Text style={{ marginTop: -16, marginBottom: 32 }}>successfully deleted!!</Text>
-                    </FancyAlert>
-                    {isLoading ? (
-                        <ActivityIndicator />
-                    ) : (
-                        <FlatList
-                            data={data}
-                            renderItem={renderItem}
-                            keyExtractor={item => `${item.id}`}
-                        // showsVerticalScrollIndicator={false}
-                        // horizontal
-                        // showsHorizontalScrollIndicator={false}
-                        />
-                    )}
-                </View>
+            <ScrollView style={{ marginTop: SIZES.radius }} refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={getMovies} />
+            }>
+                {data.length == 0 ?
+                    <View>
+                        <Text style={{ fontSize: SIZES.body2, textAlign: "center", color: COLORS.lightRed }}> No Data ... </Text>
+                    </View>
+                    :
+                    <View style={{ flex: 1, marginTop: 0, paddingLeft: SIZES.padding }}>
+                        <FancyAlert
+                            visible={visible}
+                            icon={<View style={{
+                                flex: 1,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                backgroundColor: COLORS.primary,
+                                borderRadius: 50,
+                                width: '100%',
+                            }}><Text>🤓</Text></View>}
+                            style={{ backgroundColor: 'white' }}
+                        >
+                            <Text style={{ marginTop: -16, marginBottom: 32 }}>successfully deleted!!</Text>
+                        </FancyAlert>
+                        {refreshing
+                            ? <ActivityIndicator /> :
+                            <FlatList
+                                data={data}
+                                keyExtractor={item => `${item.id}`}
+                                enableEmptySections={true}
+                                renderItem={renderItem}
+                            />
+                        }
+                    </View>
+                }
             </ScrollView>
         </SafeAreaView>
     )

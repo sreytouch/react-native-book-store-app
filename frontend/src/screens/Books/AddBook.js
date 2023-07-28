@@ -26,28 +26,24 @@ const initialValues = {
 
 const AddBook = () => {
   const navigation = useNavigation();
-  const [isLoading, setIsLoading] = useState(true);
-  const [visible, setVisible] = React.useState(false);
-  
+  const [visible, setVisible] = useState(false);
+
   const onSubmit = async (values) => {
-        setIsLoading(true);
-        try {
-            const response = await axios.post(`${baseUrl}book`, values);
-            if (response.status === 200) {
-                // alert(` You have created: ${JSON.stringify(response.data)}`);
-                setIsLoading(false);
-                setVisible(true);
-                setTimeout(() => {
-                  navigation.navigate('Books');
-                  setVisible(false);
-                }, 3000);
-            } else {
-                throw new Error("An error has ");
-            }
-        } catch (error) {
-            alert("An error has occurred");
-            setIsLoading(false);
-        }
+    try {
+      const response = await axios.post(`${baseUrl}book`, values);
+      if (response.status === 200) {
+        // alert(` You have created: ${JSON.stringify(response.data)}`);
+        setVisible(true);
+        setTimeout(() => {
+          navigation.navigate('Books');
+          setVisible(false);
+        }, 3000);
+      } else {
+        throw new Error("An error has ");
+      }
+    } catch (error) {
+      alert("An error has occurred");
+    }
   };
 
   const formik = useFormik({
@@ -176,18 +172,18 @@ const AddBook = () => {
             <Input
               value="1"
               name="viewCount"
-              style={{ display: "none"}}
+              style={{ display: "none" }}
             />
             <Input
               value="true"
               name="published"
-              style={{ display: "none"}}
+              style={{ display: "none" }}
             />
           </View>
-          <Pressable 
-            style={styles.button} 
-            onPress={handleSubmit} 
-            isDisabled={!isValid || isSubmitting} 
+          <Pressable
+            style={styles.button}
+            onPress={handleSubmit}
+            isDisabled={!isValid || isSubmitting}
             isLoading={isSubmitting}
           >
             <Text style={styles.save}>Save</Text>
@@ -247,7 +243,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 3,
     backgroundColor: COLORS.primary,
-    marginBottom:10
+    marginBottom: 10
   },
   save: {
     fontSize: 20,
